@@ -1,13 +1,11 @@
 import matplotlib
 matplotlib.use('TkAgg')
 
-from tkinter import Tk, Label, Button, Scale, HORIZONTAL, Checkbutton
+from tkinter import Tk, Label, Button, Scale, HORIZONTAL, Checkbutton, LEFT
 from PIL import Image
 from PIL.ImageTk import PhotoImage
 from preprocess import pre_process_image, read_data
 import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-import numpy as np
 
 use_gray = False
 use_canny = False
@@ -21,9 +19,8 @@ canny_high_threshold = 0
 
 gaussian_blur_kernel_size = 1
 
-image_index = 494
-
-X_train, y_train = read_data("driving_log.csv", return_images=False, dropSmallValuesWithRate=100)
+image_index = 0
+X_train, y_train = read_data("driving_log.csv", return_images=False)
 
 
 def print_configuration():
@@ -117,20 +114,33 @@ def toggle_blur():
 
 
 def reload_ui():
-    photoImage = PhotoImage(load_image(image_index))
-    window.imageView.configure(image=photoImage)
-    window.imageView.image = photoImage
-    window.imageIndexScale.set(image_index)
+    leftPhotoImage = PhotoImage(load_image(image_index + 1))
+    centerPhotoIamge = PhotoImage(load_image(image_index))
+    rightPhotoImage = PhotoImage(load_image(image_index + 2))
+
+    window.leftImageView.configure(image=leftPhotoImage)
+    window.leftImageView.image = leftPhotoImage
+
+    window.centerImageView.configure(image=centerPhotoIamge)
+    window.centerImageView.image = centerPhotoIamge
+
+    window.rightImageView.configure(image=rightPhotoImage)
+    window.rightImageView.image = rightPhotoImage
+
     window.cannyLowThreshold.set(canny_low_threshold)
     window.cannyHighThreshold.set(canny_high_threshold)
     window.gaussian_blur_kernel_size.set(gaussian_blur_kernel_size)
+
+    window.leftCameraLabel.configure(text="Left Camera (" + str(y_train[image_index + 1]) + ")")
+    window.centerCameraLabel.configure(text="Center Camera (" + str(y_train[image_index]) + ")")
+    window.rightCameraLabel.configure(text="Right Camera (" + str(y_train[image_index + 2]) + ")")
 
 
 def left_button_pressed(e):
     global image_index
 
     if (image_index > 0):
-        image_index -= 1
+        image_index -= 3
 
     reload_ui()
 
@@ -140,7 +150,7 @@ def right_button_pressed(e):
     global image_paths
 
     if (image_index < len(X_train)):
-        image_index += 1
+        image_index += 3
 
     reload_ui()
 
@@ -153,37 +163,49 @@ window.configure(background='grey')
 window.bind("<Left>", left_button_pressed)
 window.bind("<Right>", right_button_pressed)
 
-photoImage = PhotoImage(load_image(image_index))
+window.leftCameraLabel = Label(text="Left Camera (" + str(y_train[image_index + 1]) + ")")
+window.leftCameraLabel.grid(row=0, column=0, sticky='we')
 
-window.imageView = Label(window, image=photoImage)
-window.imageView.pack()
+window.centerCameraLabel = Label(text="Center Camera (" + str(y_train[image_index]) + ")")
+window.centerCameraLabel.grid(row=0, column=1, columnspan=2, sticky='we')
 
-window.imageIndexScale = Scale(window, from_=0, to=len(X_train) - 1, orient=HORIZONTAL, length=800,
-                               command=change_image_index, label="Image index")
-window.imageIndexScale.pack()
+window.rightCameraLabel = Label(text="Right Camera (" + str(y_train[image_index + 2]) + ")")
+window.rightCameraLabel.grid(row=0, column=3, sticky='we')
 
-Scale(window, from_=0, to=320, orient=HORIZONTAL, length=800, command=change_crop_top, label="Crop at the top").pack()
-Scale(window, from_=0, to=320, orient=HORIZONTAL, length=800, command=change_crop_bottom, label="Crop at the bottom").pack()
-Checkbutton(window, text="Use single color channel", command=toggle_gray).pack()
-Checkbutton(window, text="Use canny", command=toggle_canny).pack()
-window.cannyLowThreshold = Scale(window, from_=0, to=1500, orient=HORIZONTAL, length=800,
+#Left Image
+leftPhotoImage = PhotoImage(load_image(image_index + 2))
+window.leftImageView = Label(window, image=leftPhotoImage)
+window.leftImageView.grid(row=1, column=0)
+
+#Center Image
+centerPhotoIamge = PhotoImage(load_image(image_index + 1))
+window.centerImageView = Label(window, image=centerPhotoIamge)
+window.centerImageView.grid(row=1, column=1, columnspan=2)
+
+#Right Image
+rightPhotoImage = PhotoImage(load_image(image_index))
+window.rightImageView = Label(window, image=rightPhotoImage)
+window.rightImageView.grid(row=1, column=3)
+
+Scale(window, from_=0, to=320, orient=HORIZONTAL, command=change_crop_top, label="Crop at the top").grid(row=2, column=0, columnspan=2, sticky='we')
+Scale(window, from_=0, to=320, orient=HORIZONTAL, command=change_crop_bottom, label="Crop at the bottom").grid(row=2, column=2, columnspan=2, sticky='we')
+Checkbutton(window, text="Use single color channel", command=toggle_gray, justify = LEFT).grid(row=4, columnspan=4, sticky='we')
+Checkbutton(window, text="Use canny", command=toggle_canny, justify = LEFT).grid(row=5, columnspan=4, sticky='we')
+window.cannyLowThreshold = Scale(window, from_=0, to=1500, orient=HORIZONTAL,
                                  command=change_canny_low_threshold, label="Low Canny Threshold")
-window.cannyLowThreshold.pack()
+window.cannyLowThreshold.grid(row=6, column=0, columnspan=2, sticky='we')
 
-window.cannyHighThreshold = Scale(window, from_=0, to=1500, orient=HORIZONTAL, length=800,
+window.cannyHighThreshold = Scale(window, from_=0, to=1500, orient=HORIZONTAL,
                                   command=change_canny_high_threshold, label="High Canny Threshold")
-window.cannyHighThreshold.pack()
+window.cannyHighThreshold.grid(row=6, column=2, columnspan=2, sticky='we')
 
-Checkbutton(window, text="Use blur", command=toggle_blur).pack()
-window.gaussian_blur_kernel_size = Scale(window, from_=1, to=49, orient=HORIZONTAL, length=800,
+Checkbutton(window, text="Use blur", command=toggle_blur, justify=LEFT).grid(row=8, columnspan=4, sticky='we')
+window.gaussian_blur_kernel_size = Scale(window, from_=1, to=49, orient=HORIZONTAL,
                                          command=change_gaussian_blur_kernel_size, label="Blur Kernel Size")
-window.gaussian_blur_kernel_size.pack()
+window.gaussian_blur_kernel_size.grid(row=9, columnspan=4, sticky='we')
 
-Button(window, text="Print values", command=print_configuration).pack()
+Button(window, text="Print values", command=print_configuration).grid(row=10, columnspan=4, sticky='we')
 
-Button(window, text="Close", command=quit).pack()
-
-plt.hist(y_train, range=[-1.5, 1.5], bins=np.arange(min(y_train), max(y_train) + 0.01, 0.01))
-plt.show()
+Button(window, text="Close", command=quit).grid(row=11, columnspan=4, sticky='we')
 
 window.mainloop()

@@ -71,6 +71,17 @@ I also flip all of the images and angles to double the training size. And I drop
 
 I half every image to make the processing faster.
 
+Below are several examples of the preprocessed images and corresponding steering angles in the pre-processing UI I have built.
+
+![Example 1](doc_img/example1.png)
+![Example 2](doc_img/example2.png)
+![Example 3](doc_img/example3.png)
+![Example 4](doc_img/example4.png)
+![Example 5](doc_img/example5.png)
+![Example 6](doc_img/example6.png)
+![Example 7](doc_img/example7.png)
+
+
 ##Model Architecture and Training Strategy
 
 ###1. Solution Design Approach
@@ -82,9 +93,9 @@ The final model architecture is a convlutional neural network with the following
 1. Convolution 2D layer with 5x5 size
 2. Convolution 2D layer with 5x5 size
 3. Convolution 2D layer with 5x5 size
-4. Convolution 1D layer with 3x3 size
+4. Convolution 2D layer with 3x3 size
 5. Flatten layer
-6. Dropout with %25 chance
+6. Dropout with 25% chance
 7. Dense with 100 elements
 8. Dense with 50 elements
 9. Dense with 10 elements
@@ -100,4 +111,4 @@ The training is taking between 36 and 39 seconds per epoch. My training loss is 
 
 Here is the video of my car completing the first track:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/cMsf99SIArE" frameborder="0" allowfullscreen></iframe>
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/cMsf99SIArE/0.jpg)](https://www.youtube.com/watch?v=cMsf99SIArE)
