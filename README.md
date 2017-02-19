@@ -45,15 +45,19 @@ The `preprocess_gui.py` file contains a GUI application to visualise the image p
 
 ###1. An appropriate model architecture has been emplyed.
 
-My model consist of a convolution neural network with 3x3 and 5x5 filter sizes (`model.py` lines 20-25 and 35-41)
+As you will see in my `model.py` file, I have developed two neural networks, a three dimensional one which accepts colored images and a two dimensional network which accepts a single color images.
 
-The model is also usen a `Flatter` layer after the convolutional layers (line 35), dropout to avoid overfitting (line 36) and multiple dense layers (lines 37 - 41).
+I have very big hopes for my two dimensional network, but unfortunately it didn't work out to be successful, so at the end I have used the three dimensional network, so I will be describing it in more details.
+
+My model consist of a convolution neural network with 3x3 and 5x5 filter sizes (`model.py` lines 28-32)
+
+The model is also usen a `Flatten` layer after the convolutional layers (line 34), dropout to avoid overfitting (line 35) and multiple dense layers (lines 36 - 39).
 
 All of the data is normalized prior to training, so I don't have any normalization layers.
 
 ###2. Attempts to reduce overfitting in the model.
 
-I've used the dropout layer on line 36, I drop 25% of the data during the dropout.
+I've used the dropout layer on line 35, I drop 25% of the data during the dropout.
 
 ###3. Model parameter turning.
 
@@ -63,40 +67,28 @@ The model used an adam optimizer, so the learning rate was not tuned manually (l
 
 I've tried to record the training data using a driving wheel, but I didn't have much success with it. Instead I ended up using the training data provided by Udacity. I increase the amount of data by using all three cameras (left, center and right), I adjust the angles by `0.25` gradient for the side cameras.
 
-I also flip all of the images and angles to double the training size. At the end I ended up having 38,572 sample of the training data.
+I also flip all of the images and angles to double the training size. And I drop out 50% of the images with a steering angle of 0.2 or smaller. I did this to avoid the model from having a bias of driving straight. At the end I ended up having 21,364 sample of the training data.
 
-I use computer vision to pre-process each image, I cover the details lower in this file.
+I half every image to make the processing faster.
 
 ##Model Architecture and Training Strategy
 
 ###1. Solution Design Approach
-I based my solution on the network structure designed by Nvidia. However, because I'm removing the color during the pre-processing I lost the third dimension, so instead of using `Convlution2D` layers I ended up using `Convolution1D` layers of the same size.
-
-The biggest challenge for my car was the corner right after the bridge. Instead of turning left my car was insisting on going straight. I've tried collecting more data, but it didn't help. 
-
-In the end I ended up using some of the computer vision concepts we were taught during the first and the fourth projects. Specifically I preprocess the images in the following way:
-
-1. I convert the images to HLS color space.
-2. I remove every other channel, but "H"
-3. I threshold all of the colors between `0` and `80` to black, and end up with the following result:
-
-![SingleChannel.png](doc_img/single_channel.png)
-
-4. 
+I based my solution on the network structure designed by Nvidia, but I have significantly simplified the model.
 
 ###2. Final Model Architecture
 
 The final model architecture is a convlutional neural network with the following layers:
-1. Convolution 1D layer with 5x5 size
-2. Convolution 1D layer with 5x5 size
+1. Convolution 2D layer with 5x5 size
+2. Convolution 2D layer with 5x5 size
+3. Convolution 2D layer with 5x5 size
 4. Convolution 1D layer with 3x3 size
-5. Convolution 1D layer with 3x3 size
-6. Flatten layer
-7. Dropout with %25 chance
-9. Dense with 100 elements
-10. Dense with 50 elements
-11. Dense with 10 elements
-12. Dense with 1 element for regression.
+5. Flatten layer
+6. Dropout with %25 chance
+7. Dense with 100 elements
+8. Dense with 50 elements
+9. Dense with 10 elements
+10. Dense with 1 element for regression.
 
 Visualization of the network:
 
@@ -104,8 +96,8 @@ Visualization of the network:
 
 During the training I load previous weights, then split the data set and leave 80% for training and 20% for validation and I also shuffle the traning set to ensure the best results.
 
-The training is taking between 13 and 15 seconds per epoch. My training loss is around `0.0215` and my validation loss is around `0.0280`, which is not very high and more importantly, close to each other.
+The training is taking between 36 and 39 seconds per epoch. My training loss is around `0.0244` and my validation loss is around `0.0269`, which is not very high and more importantly, close to each other.
 
 Here is the video of my car completing the first track:
 
-![result](doc_img/out.mp4)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/cMsf99SIArE" frameborder="0" allowfullscreen></iframe>
